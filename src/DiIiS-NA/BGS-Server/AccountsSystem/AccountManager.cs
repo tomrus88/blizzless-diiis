@@ -81,7 +81,7 @@ namespace DiIiS_NA.LoginServer.AccountsSystem
 			try
 			{
 				var account = GetAccountByEmail(email);
-				account.DBAccount.ReferralCode = ((int)(account.DBAccount.Id * 17) + Core.Helpers.Math.FastRandom.Instance.Next(16));
+				account.DBAccount.ReferralCode = (int)(account.DBAccount.Id * 17) + Core.Helpers.Math.FastRandom.Instance.Next(16);
 				DBSessions.SessionUpdate(account.DBAccount);
 				return true;
 			}
@@ -109,8 +109,9 @@ namespace DiIiS_NA.LoginServer.AccountsSystem
 
 		public static Account GetAccountByEmail(string email)
 		{
-			if (LoadedAccounts.Any(a => a.Value.Email.ToLower() == email.ToLower()))
-				return LoadedAccounts[LoadedAccounts.Single(a => a.Value.Email.ToLower() == email.ToLower()).Key];
+			Account acc = LoadedAccounts.FirstOrDefault(a => a.Value.Email.Equals(email, StringComparison.OrdinalIgnoreCase)).Value;
+			if (acc != null)
+				return acc;
 			else
 			{
 				List<DBAccount> dbAcc = DBSessions.SessionQueryWhere<DBAccount>(dba => dba.Email == email);
@@ -167,8 +168,8 @@ namespace DiIiS_NA.LoginServer.AccountsSystem
 
 		public static Account GetAccountByPersistentID(ulong persistentId)
 		{
-			if (LoadedAccounts.ContainsKey(persistentId))
-				return LoadedAccounts[persistentId];
+			if (LoadedAccounts.TryGetValue(persistentId, out var acc))
+				return acc;
 			else
 			{
 				return GetAccountByDBAccount(DBSessions.SessionGet<DBAccount>(persistentId));
@@ -177,8 +178,8 @@ namespace DiIiS_NA.LoginServer.AccountsSystem
 
 		public static Account GetAccountByDBAccount(DBAccount dbAccount)
 		{
-			if (LoadedAccounts.ContainsKey(dbAccount.Id))
-				return LoadedAccounts[dbAccount.Id];
+			if (LoadedAccounts.TryGetValue(dbAccount.Id, out var acc))
+				return acc;
 			else
 			{
 				var account = new Account(dbAccount);
@@ -245,7 +246,7 @@ namespace DiIiS_NA.LoginServer.AccountsSystem
 
 		public static Account GetAccountBySaltTicket(string ticket)
 		{
-			if (DBSessions.SessionQueryWhere<DBAccount>(dba => dba.SaltedTicket == ticket).Count() > 0)
+			if (DBSessions.SessionQueryWhere<DBAccount>(dba => dba.SaltedTicket == ticket).Any())
 				return LoadedAccounts[LoadedAccounts.Single(a => a.Value.SaltedTicket == ticket).Key];
 			return null;
 		}

@@ -114,7 +114,7 @@ namespace DiIiS_NA.GameServer.GSSystem.ActorSystem.Implementations.Hirelings
 			return false;
 
 
-			return base.Reveal(player);
+			//return base.Reveal(player);
 		}
 	}
 }

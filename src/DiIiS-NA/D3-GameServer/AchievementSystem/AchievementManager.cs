@@ -41,18 +41,17 @@ namespace DiIiS_NA.GameServer.AchievementSystem
 
 		public static void Initialize()
 		{
-			if (File.Exists(Path.Combine(FileHelpers.AssemblyRoot, AchievementFilename)))
+			string achievementsFilePath = Path.Combine(FileHelpers.AssemblyRoot, AchievementFilename);
+			if (File.Exists(achievementsFilePath))
 			{
-				var br = new BinaryReader(File.Open(Path.Combine(FileHelpers.AssemblyRoot, AchievementFilename), FileMode.Open));
-				Achievements = D3.AchievementsStaticData.AchievementFile.ParseFrom(br.ReadBytes((int)br.BaseStream.Length));
-				br.Close();
+				Achievements = D3.AchievementsStaticData.AchievementFile.ParseFrom(File.ReadAllBytes(achievementsFilePath));
 				Logger.Info("Achievements loaded from file.");
 			}
 			else
 			{
 				Logger.Info("Achimevement file not founded! Try download...");
 				var attempts = 0;
-				byte[] data = new byte[] { };
+				byte[] data = Array.Empty<byte>();
 				while (attempts < 5)
 				{
 					try
@@ -70,10 +69,7 @@ namespace DiIiS_NA.GameServer.AchievementSystem
 					Achievements = D3.AchievementsStaticData.AchievementFile.ParseFrom(data);
 					if (attempts < 5)
 					{
-						var br = new BinaryWriter(File.Open(AchievementFilename, FileMode.CreateNew));
-						br.Write(data);
-						br.Close();
-
+						File.WriteAllBytes(AchievementFilename, data);
 					}
 					else
 					{
@@ -184,7 +180,7 @@ namespace DiIiS_NA.GameServer.AchievementSystem
 				lock (client.serviceLock)
 				{
 					Logger.Trace("GrantAchievement(): id {0}", achievementId);
-					if (client.Account.GameAccount.Achievements.Where(a => a.AchievementId == achievementId && a.Completion != -1).Count() > 0) return;
+					if (client.Account.GameAccount.Achievements.Where(a => a.AchievementId == achievementId && a.Completion != -1).Any()) return;
 					DBAchievements achievement = null;
 					var achs = DBSessions.SessionQueryWhere<DBAchievements>(dbi =>
 							dbi.DBGameAccount.Id == client.Account.GameAccount.PersistentID);
@@ -201,7 +197,7 @@ namespace DiIiS_NA.GameServer.AchievementSystem
 						{
 							DBGameAccount = client.Account.GameAccount.DBGameAccount,
 							AchievementId = achievementId,
-							Criteria = new byte[0],
+							Criteria = Array.Empty<byte>(),
 							IsHardcore = AchievementManager.IsHardcore(achievementId),
 							CompleteTime = (int)DateTime.Now.ToUnixTime()
 						};
@@ -313,7 +309,7 @@ namespace DiIiS_NA.GameServer.AchievementSystem
 						}
 
 						var ach_data = Achievements.AchievementList.Single(a => a.Id == definition.ParentAchievementId);
-						if (!ach_data.HasSupersedingAchievementId || client.Account.GameAccount.Achievements.Where(a => a.AchievementId == ach_data.SupersedingAchievementId && a.Completion > 0).Count() > 0)
+						if (!ach_data.HasSupersedingAchievementId || client.Account.GameAccount.Achievements.Where(a => a.AchievementId == ach_data.SupersedingAchievementId && a.Completion > 0).Any())
 							UpdateSnapshot(client, 0, criteriaId);
 					}
 					else
@@ -385,7 +381,7 @@ namespace DiIiS_NA.GameServer.AchievementSystem
 				{
 					if (additionalQuantity == 0) return;
 					Logger.Trace("UpdateQuantity(): id {0}", achievementId);
-					if (client.Account.GameAccount.Achievements.Where(a => a.AchievementId == achievementId && a.Completion != -1).Count() > 0) return;
+					if (client.Account.GameAccount.Achievements.Where(a => a.AchievementId == achievementId && a.Completion != -1).Any()) return;
 
 					ulong mainCriteriaId = AchievementManager.GetMainCriteria(achievementId);
 					var aa = client.Account.GameAccount.AchievementCriteria;
@@ -477,11 +473,11 @@ namespace DiIiS_NA.GameServer.AchievementSystem
 			var capped_toons = DBSessions.SessionQueryWhere<DBToon>(dbt =>
 						dbt.DBGameAccount.Id == client.Account.GameAccount.PersistentID &&
 						dbt.Level == 60);
-			if (capped_toons.Count() >= 2)
+			if (capped_toons.Count >= 2)
 				GrantAchievement(client, 74987243307116);
-			if (capped_toons.Count() >= 5)
+			if (capped_toons.Count >= 5)
 				GrantAchievement(client, 74987243307118);
-			if (capped_toons.Count() >= 10)
+			if (capped_toons.Count >= 10)
 				GrantAchievement(client, 74987243307120);
 
 			int different_classes = 0;
@@ -489,7 +485,7 @@ namespace DiIiS_NA.GameServer.AchievementSystem
 			foreach (ToonClass toon_class in (ToonClass[])Enum.GetValues(typeof(ToonClass)))
 			{
 				var toons = capped_toons.Where(t => t.Class == toon_class);
-				if (toons.Count() > 0) different_classes++;
+				if (toons.Any()) different_classes++;
 				if (toons.Count() >= 2)
 				{
 					switch (toon_class)
@@ -536,7 +532,7 @@ namespace DiIiS_NA.GameServer.AchievementSystem
 				(c.AdvanceEvent.Id == 105 && c.AdvanceEvent.Comparand == actorId64)).ToList();
 
 			if (!isHardcore)
-				criterias = criterias.Where(c => c.AdvanceEvent.ModifierList.Where(m => m.NecessaryCondition == 306).Count() == 0).ToList();
+				criterias = criterias.Where(c => !c.AdvanceEvent.ModifierList.Where(m => m.NecessaryCondition == 306).Any()).ToList();
 
 			criterias = criterias.Where(c => c.AdvanceEvent.ModifierList.Single(m => m.NecessaryCondition == 103).Comparand == type64).ToList();
 

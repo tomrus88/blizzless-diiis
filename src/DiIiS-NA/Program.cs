@@ -203,15 +203,12 @@ namespace DiIiS_NA
             }
         }
 
-        [HandleProcessCorruptedStateExceptions]
-        [SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlAppDomain)]
         static void Main() 
         {
             LoginServer().Wait(); 
         }
          
         [SecurityCritical]
-        [HandleProcessCorruptedStateExceptionsAttribute]
         private static void UnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs e)
         {
             var ex = e.ExceptionObject as Exception;

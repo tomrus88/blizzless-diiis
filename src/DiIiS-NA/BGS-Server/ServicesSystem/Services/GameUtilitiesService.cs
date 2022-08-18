@@ -2402,7 +2402,7 @@ namespace DiIiS_NA.LoginServer.ServicesSystem.Services
 
             var response = MatchmakingGetStatsResponse.CreateBuilder().AddStatsBucket(back);
             return response.Build().ToByteString();
-            return ByteString.Empty;
+            //return ByteString.Empty;
         }
         #endregion
 

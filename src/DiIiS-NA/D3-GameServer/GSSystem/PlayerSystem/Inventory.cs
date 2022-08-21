@@ -254,6 +254,8 @@ namespace DiIiS_NA.GameServer.GSSystem.PlayerSystem
 				_owner.GrantCriteria(74987243308421);
 			if (item.ItemType.Name.Contains("ScoundrelSpecial"))
 				_owner.GrantCriteria(74987243308422);
+
+			_owner.PlayEffect(Effect.Sound, 196576);
 			return success;
 		}
 
@@ -346,6 +348,7 @@ namespace DiIiS_NA.GameServer.GSSystem.PlayerSystem
 			item.Unreveal(_owner);
 			this.AddGoldAmount(cost);
 			(vendor as Vendor).AddBuybackItem(item, _owner);
+			_owner.PlayEffect(Effect.Sound, 36744);
 		}
 
 		public bool CheckItemSlots(Item target_item, int destination_slot)
@@ -600,9 +603,7 @@ namespace DiIiS_NA.GameServer.GSSystem.PlayerSystem
 									var addedItem = destGrid.GetItem(item.InvLoc(_owner).Row + 1, item.InvLoc(_owner).Column);
 									if (addedItem != null)
 									{
-										if (sourceGrid.GetItemInventorySize(addedItem).Height == 2)
-											;
-										else
+										if (sourceGrid.GetItemInventorySize(addedItem).Height != 2)
 										{
 											ChangeItemSlotDB(request.Location.EquipmentSlot, addedItem);
 											ChangeItemLocationDB(old_x, old_y + 1, addedItem);

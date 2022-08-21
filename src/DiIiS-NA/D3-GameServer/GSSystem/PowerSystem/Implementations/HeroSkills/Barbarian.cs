@@ -1,4 +1,4 @@
-﻿//Blizzless Project 2022 
+﻿//Blizzless Project 2022
 using DiIiS_NA.GameServer.Core.Types.Math;
 //Blizzless Project 2022 
 using DiIiS_NA.GameServer.Core.Types.TagMap;
@@ -24,9 +24,7 @@ using System;
 using System.Collections.Generic;
 //Blizzless Project 2022 
 using System.Linq;
-//Blizzless Project 2022 
-using System.Text;
-//Blizzless Project 2022 
+//Blizzless Project 2022
 using System.Threading.Tasks;
 
 namespace DiIiS_NA.GameServer.GSSystem.PowerSystem.Implementations
@@ -41,8 +39,8 @@ namespace DiIiS_NA.GameServer.GSSystem.PowerSystem.Implementations
 			bool hitAnything = false;
 			var ShockWavePos = PowerMath.TranslateDirection2D(User.Position, TargetPosition,
 															  User.Position,
-															  ScriptFormula(23));
-			var maxHits = 2;
+															  10.0f);
+			var maxHits = 1;
 			for (int i = 0; i < maxHits; ++i)
 			{
 				AttackPayload attack = new AttackPayload(this);
@@ -58,7 +56,7 @@ namespace DiIiS_NA.GameServer.GSSystem.PowerSystem.Implementations
 					hitAnything = true;
 					if (Rune_D > 0)
 					{
-						GeneratePrimaryResource(ScriptFormula(10));
+						GeneratePrimaryResource(6.0f);
 					}
 					if (Rune_B > 0)
 					{
@@ -70,18 +68,16 @@ namespace DiIiS_NA.GameServer.GSSystem.PowerSystem.Implementations
 					}
 					else if (Rune_C > 0)
 					{
-						if (Rand.NextDouble() < ScriptFormula(14))
-							AddBuff(hitPayload.Target, new DebuffStunned(WaitSeconds(ScriptFormula(15))));
+						if (Rand.NextDouble() < 0.5)
+							AddBuff(hitPayload.Target, new DebuffStunned(WaitSeconds(1.5f)));
 					}
 					else
 					{
-						if (Rand.NextDouble() < ScriptFormula(0))
-							Knockback(hitPayload.Target, ScriptFormula(5), ScriptFormula(6), ScriptFormula(7));
+						if (Rand.NextDouble() < 0.1)
+							Knockback(hitPayload.Target, 0.8f, 2, -0.03f);
 					}
 				};
 				attack.Apply();
-				yield return WaitSeconds(0.5f);
-
 				if (hitAnything)
 					GeneratePrimaryResource(EvalTag(PowerKeys.ResourceGainedOnFirstHit));
 			}
@@ -704,7 +700,7 @@ namespace DiIiS_NA.GameServer.GSSystem.PowerSystem.Implementations
 			if (Rune_B > 0)
 			{
 				AttackPayload attack = new AttackPayload(this);
-				attack.Targets = GetEnemiesInArcDirection(User.Position, TargetPosition, ScriptFormula(14), ScriptFormula(15));
+				attack.Targets = GetEnemiesInArcDirection(User.Position, TargetPosition, 22, 1);
 				attack.AddWeaponDamage(ScriptFormula(23), DamageType.Physical);
 				attack.Apply();
 				yield break;
